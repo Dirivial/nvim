@@ -536,6 +536,7 @@ require('lazy').setup({
             Lua = {},
           },
         },
+        ty = {},
       }
 
       -- Ensure the servers and tools above are installed
@@ -553,7 +554,9 @@ require('lazy').setup({
         'golangci-lint',
         'gopls',
         'markdownlint',
+        'ruff',
         'stylua',
+        'ty',
       })
 
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -766,7 +769,7 @@ require('lazy').setup({
     config = function()
       local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
       require('nvim-treesitter').setup()
-      require('nvim-treesitter.configs').setup {
+      require('nvim-treesitter.config').setup {
         ensure_installed = parsers,
         sync_install = false,
         auto_install = true,
