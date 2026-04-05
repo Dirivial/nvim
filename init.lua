@@ -767,9 +767,10 @@ require('lazy').setup({
     branch = 'main',
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
     config = function()
-      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+      local parsers = { 'bash', 'c', 'go', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
       require('nvim-treesitter').setup()
       require('nvim-treesitter.config').setup {
+        install_dir = vim.fn.stdpath 'data' .. '/mason/tree-sitter',
         ensure_installed = parsers,
         sync_install = false,
         auto_install = true,
