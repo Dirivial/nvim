@@ -507,6 +507,7 @@ require('lazy').setup({
         -- ts_ls = {},
 
         stylua = {}, -- Used to format Lua code
+        gopls = {}, -- Used to format Go code
 
         -- Special Lua Config, as recommended by neovim help docs
         lua_ls = {
