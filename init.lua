@@ -155,6 +155,22 @@ local rtp = vim.opt.rtp
 rtp:prepend(lazypath)
 
 -- [[ Configure and install plugins ]]
+local tools_managed_by_nix = vim.env.NVIM_TOOLS_MANAGED_BY_NIX == '1'
+
+local lsp_dependencies = {
+    -- Useful status updates for LSP.
+    { 'j-hui/fidget.nvim', opts = {} },
+}
+
+if not tools_managed_by_nix then
+    vim.list_extend(lsp_dependencies, {
+        -- Install external editor tools on hosts that do not provide them.
+        { 'mason-org/mason.nvim', opts = {} },
+        'mason-org/mason-lspconfig.nvim',
+        'WhoIsSethDaniel/mason-tool-installer.nvim',
+    })
+end
+
 require('lazy').setup({
     { 'NMAC427/guess-indent.nvim', opts = {} },
 
@@ -381,24 +397,7 @@ require('lazy').setup({
     {
         -- Main LSP Configuration
         'neovim/nvim-lspconfig',
-        dependencies = {
-            -- Automatically install LSPs and related tools to stdpath for Neovim
-            -- Mason must be loaded before its dependents so we need to set it up here.
-            -- NOTE: `opts = {}` is the same as calling `require('mason').setup({})`
-            {
-                'mason-org/mason.nvim',
-                ---@module 'mason.settings'
-                ---@type MasonSettings
-                ---@diagnostic disable-next-line: missing-fields
-                opts = {},
-            },
-            -- Maps LSP server names between nvim-lspconfig and Mason package names.
-            'mason-org/mason-lspconfig.nvim',
-            'WhoIsSethDaniel/mason-tool-installer.nvim',
-
-            -- Useful status updates for LSP.
-            { 'j-hui/fidget.nvim', opts = {} },
-        },
+        dependencies = lsp_dependencies,
         config = function()
             -- Brief aside: **What is LSP?**
             --
@@ -496,8 +495,8 @@ require('lazy').setup({
                 end,
             })
 
-            -- Enable the following language servers
-            --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
+            -- Enable the following language servers.
+            -- On Nix-managed hosts they must be available on PATH; elsewhere Mason installs them.
             --  See `:help lsp-config` for information about keys and how to configure
             ---@type table<string, vim.lsp.Config>
             local servers = {
@@ -510,8 +509,8 @@ require('lazy').setup({
                 -- But for many setups, the LSP (`ts_ls`) will work just fine
                 -- ts_ls = {},
 
-                stylua = {}, -- Used to format Lua code
-                gopls = {}, -- Used to format Go code
+                gopls = {},
+                nil_ls = {},
 
                 -- Special Lua Config, as recommended by neovim help docs
                 lua_ls = {
@@ -546,27 +545,20 @@ require('lazy').setup({
                 ty = {},
             }
 
-            -- Ensure the servers and tools above are installed
-            --
-            -- To check the current status of installed tools and/or manually install
-            -- other tools, you can run
-            --    :Mason
-            --
-            -- You can press `g?` for help in this menu.
-            local ensure_installed = vim.tbl_keys(servers or {})
-            vim.list_extend(ensure_installed, {
-                'clang-format',
-                'cpplint',
-                'gofumpt',
-                'golangci-lint',
-                'gopls',
-                'markdownlint',
-                'ruff',
-                'stylua',
-                'ty',
-            })
+            if not tools_managed_by_nix then
+                local ensure_installed = vim.tbl_keys(servers or {})
+                vim.list_extend(ensure_installed, {
+                    'clang-format',
+                    'cpplint',
+                    'gofumpt',
+                    'golangci-lint',
+                    'markdownlint',
+                    'ruff',
+                    'stylua',
+                })
 
-            require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+                require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+            end
 
             for name, server in pairs(servers) do
                 vim.lsp.config(name, server)
