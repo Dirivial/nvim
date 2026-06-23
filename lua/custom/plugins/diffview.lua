@@ -26,6 +26,41 @@ return {
   },
   opts = {},
   config = function(_, opts)
+    local actions = require 'diffview.actions'
+
+    local fold_desc = {
+      za = 'Toggle fold',
+      zA = 'Toggle fold recursively',
+      ze = 'Scroll cursor to right edge',
+      zE = 'Eliminate all folds',
+      zo = 'Open fold',
+      zc = 'Close fold',
+      zO = 'Open fold recursively',
+      zC = 'Close fold recursively',
+      zr = 'Reduce folding',
+      zm = 'Increase folding',
+      zR = 'Open all folds',
+      zM = 'Close all folds',
+      zv = 'Open folds under cursor',
+      zx = 'Update folds',
+      zX = 'Update folds and close',
+      zn = 'Disable folding',
+      zN = 'Enable folding',
+      zi = 'Toggle folding',
+    }
+
+    opts.keymaps = opts.keymaps or {}
+    opts.keymaps.view = opts.keymaps.view or {}
+
+    for _, mapping in ipairs(actions.compat.fold_cmds) do
+      table.insert(opts.keymaps.view, {
+        mapping[1],
+        mapping[2],
+        mapping[3],
+        { desc = fold_desc[mapping[2]] or 'Diff fold command' },
+      })
+    end
+
     require('diffview').setup(opts)
     require('custom.git.pr_preview').setup()
   end,
